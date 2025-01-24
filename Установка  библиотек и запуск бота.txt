@@ -1,0 +1,6 @@
+1.Запуск
+ C:\Users\k.tabarov\AppData\Local\Programs\Python\Python312\python.exe d:/КМ/Программирование/Back/Python/Counter-bot/bot.py
+
+2. Установка библиотек
+
+C:\Users\k.tabarov\AppData\Local\Programs\Python\Python312\python.exe -m pip install <пакет>
