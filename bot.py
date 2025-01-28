@@ -172,7 +172,7 @@ def log_completed_game(players, time):
 def main():
     proxy_url = "http://50.207.199.81:80"  # Прокси 
     application = Application.builder().token(
-    "7729959094:AAFBhKXFvpVWiGu85GNN7Xk34rWWrtP4K0I").proxy(proxy_url).build()
+    "7954161986:AAHlRCZDrSvNYgi6xE2sVdcoCF6TD-0jWhI").proxy(proxy_url).build()
 
     application.add_handler(CommandHandler("start", start))
     application.add_handler(CallbackQueryHandler(join_game, pattern="join_game"))
