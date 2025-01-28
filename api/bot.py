@@ -1,15 +1,15 @@
 import datetime
 import random
 import asyncio
+import os
+from aiohttp import web
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Application, CommandHandler, CallbackQueryHandler
-import os
 
 TIME_OPTIONS = [
     "19:00", "19:30", "20:00", "20:30", "21:00", "22:00", "22:30", "23:00"
 ]
-MAX_PLAYERS = 1
-
+MAX_PLAYERS = 10
 
 def shuffle_players(players):
     random.shuffle(players)
@@ -165,13 +165,8 @@ async def cancel_game(update, context):
         reply_markup=reply_markup)
 
 
-def log_completed_game(players, time):
-    with open("game_logs.txt", "a") as log_file:
-        log_file.write(f"Игра завершена\nВремя: {time}\nИгроки: {', '.join(players)}\n\n")
-
-
-# Функция, которая обрабатывает запросы на Vercel
-async def handler(request):
+# Функция для запуска бота на Vercel
+async def handle(request):
     application = Application.builder().token(os.getenv("TELEGRAM_BOT_TOKEN")).build()
 
     application.add_handler(CommandHandler("start", start))
@@ -184,6 +179,13 @@ async def handler(request):
     # Запуск бота на Vercel
     await application.updater.start_polling()
 
+    return web.Response(text="Bot is running")
 
-# Убедитесь, что export handler будет доступен на Vercel
-app = handler
+
+# Создание веб-сервера для Vercel
+app = web.Application()
+app.add_routes([web.get('/', handle)])
+
+# Запуск сервера
+if __name__ == "__main__":
+    web.run_app(app)
