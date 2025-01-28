@@ -1,7 +1,7 @@
+import os
 import datetime
 import random
 import asyncio
-import os
 from aiohttp import web
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Application, CommandHandler, CallbackQueryHandler
@@ -10,6 +10,7 @@ TIME_OPTIONS = [
     "19:00", "19:30", "20:00", "20:30", "21:00", "22:00", "22:30", "23:00"
 ]
 MAX_PLAYERS = 10
+
 
 def shuffle_players(players):
     random.shuffle(players)
@@ -165,7 +166,14 @@ async def cancel_game(update, context):
         reply_markup=reply_markup)
 
 
-# Функция для запуска бота на Vercel
+# Функция для установки webhook
+async def set_webhook(application, webhook_url):
+    url = f"https://api.telegram.org/bot{os.getenv('TELEGRAM_BOT_TOKEN')}/setWebhook?url={webhook_url}"
+    async with application.bot.session.get(url):
+        print("Webhook set successfully.")
+
+
+# Функция для обработки запросов на Vercel
 async def handle(request):
     application = Application.builder().token(os.getenv("TELEGRAM_BOT_TOKEN")).build()
 
@@ -176,15 +184,16 @@ async def handle(request):
     application.add_handler(CallbackQueryHandler(change_game_time, pattern="change_time"))
     application.add_handler(CallbackQueryHandler(cancel_game, pattern="cancel_game"))
 
-    # Запуск бота на Vercel
-    await application.updater.start_polling()
+    # Устанавливаем webhook
+    webhook_url = f"{os.getenv('VERCEL_URL')}/webhook"
+    await set_webhook(application, webhook_url)
 
     return web.Response(text="Bot is running")
 
 
 # Создание веб-сервера для Vercel
 app = web.Application()
-app.add_routes([web.get('/', handle)])
+app.add_routes([web.post('/webhook', handle)])
 
 # Запуск сервера
 if __name__ == "__main__":
