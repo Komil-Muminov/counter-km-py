@@ -3,6 +3,7 @@ import random
 import asyncio
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Application, CommandHandler, CallbackQueryHandler
+import os
 
 TIME_OPTIONS = [
     "19:00", "19:30", "20:00", "20:30", "21:00", "22:00", "22:30", "23:00"
@@ -169,10 +170,9 @@ def log_completed_game(players, time):
         log_file.write(f"Игра завершена\nВремя: {time}\nИгроки: {', '.join(players)}\n\n")
 
 
-def main():
-    proxy_url = "http://50.207.199.81:80"  # Прокси 
-    application = Application.builder().token(
-    "7954161986:AAHlRCZDrSvNYgi6xE2sVdcoCF6TD-0jWhI").proxy(proxy_url).build()
+# Функция, которая обрабатывает запросы на Vercel
+async def handler(request):
+    application = Application.builder().token(os.getenv("TELEGRAM_BOT_TOKEN")).build()
 
     application.add_handler(CommandHandler("start", start))
     application.add_handler(CallbackQueryHandler(join_game, pattern="join_game"))
@@ -181,8 +181,9 @@ def main():
     application.add_handler(CallbackQueryHandler(change_game_time, pattern="change_time"))
     application.add_handler(CallbackQueryHandler(cancel_game, pattern="cancel_game"))
 
-    application.run_polling()
+    # Запуск бота на Vercel
+    await application.updater.start_polling()
 
 
-if __name__ == "__main__":
-    main()
+# Убедитесь, что export handler будет доступен на Vercel
+app = handler
